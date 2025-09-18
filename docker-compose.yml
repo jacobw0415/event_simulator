@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  event-simulator:
+    build: .
+    container_name: event-simulator
+    environment:
+      - API_URL=http://host.docker.internal:8080/events   # Windows/Mac
+      # Linux 環境改成實際 server API URL
+      - INTERVAL=5
+      - CATEGORY=ESG
+    restart: unless-stopped

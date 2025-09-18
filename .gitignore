@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.env
+.venv/
+env/
+venv/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.seed
+*.bak
+docker-compose.override.yml
+
+# Test/Reports
+.coverage
+.pytest_cache/
+htmlcov/
+*.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+*.spec
