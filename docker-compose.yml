@@ -5,7 +5,7 @@ services:
     build: .
     container_name: event-simulator
     environment:
-      - API_URL=http://host.docker.internal:8080/events   # Windows/Mac
+      - API_URL=https://api.accelera-vs.com:8088/events   # Windows/Mac
       # Linux 環境改成實際 server API URL
       - INTERVAL=5
       - CATEGORY=ESG
