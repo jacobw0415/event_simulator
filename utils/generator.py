@@ -6,6 +6,10 @@ DEVICES = [
     ("CO2Sensor03", "CO2"),
     ("SmokeDetector02", "Smoke"),
     ("WaterLevel04", "WaterLevel"),
+    ("HumiditySensor05", "Humidity"),
+    ("VibrationSensor06", "Vibration"),
+    ("PowerMeter07", "Power"),
+    ("GasDetector08", "GasLeak"),
 ]
 
 GATEWAYS = [
@@ -21,7 +25,8 @@ LOCATIONS = [
     "Dock-3",
     "Control-Room",
     "Pump-Station",
-    "Office-Building"
+    "Office-Building",
+    "Generator-Room",
 ]
 
 
