@@ -1,76 +1,60 @@
 import random
 import datetime
 
-DEVICES = [
-    ("TempSensor01", "Temperature"),
-    ("CO2Sensor03", "CO2"),
-    ("SmokeDetector02", "Smoke"),
-    ("WaterLevel04", "WaterLevel"),
-    ("HumiditySensor05", "Humidity"),
-    ("VibrationSensor06", "Vibration"),
-    ("PowerMeter07", "Power"),
-    ("GasDetector08", "GasLeak"),
+# === 設備對應表（根據亞灣架構） ===
+GATEWAYS = [
+    ("HKP01", "HighPole-01"),
+    ("HKP02", "HighPole-02"),
+    ("HKP03", "HighPole-03"),
+    ("ST701", "Gate-70-1"),
+    ("ST702", "Gate-70-2"),
+    ("YMCORE", "YM-ServerRoom"),
 ]
 
-GATEWAYS = [
-    ("GW1", "Gateway-1"),
-    ("GW2", "Gateway-2"),
-    ("GW3", "Gateway-3"),
+DEVICES = [
+    ("IW9167E", "WirelessBridge"),
+    ("IE3300", "IndustrialSwitch"),
+    ("IE3400", "EdgeSwitch"),
+    ("IE9320", "AggregationSwitch"),
+    ("C9300X", "CoreSwitch"),
+    ("C9800", "WirelessController"),
+    ("IC3000", "IoTGateway"),
 ]
 
 SEVERITIES = ["Information", "Warning", "Error", "Emergency"]
 
-LOCATIONS = [
-    "Warehouse-A",
-    "Dock-3",
-    "Control-Room",
-    "Pump-Station",
-    "Office-Building",
-    "Generator-Room",
-]
+EVENT_TEMPLATES = {
+    "WirelessBridge": "Wireless link fluctuation detected on {deviceName}",
+    "IndustrialSwitch": "Port utilization high on {deviceName}",
+    "EdgeSwitch": "Access switch temperature warning at {gatewayName}",
+    "AggregationSwitch": "Fiber uplink unstable at {gatewayName}",
+    "CoreSwitch": "High CPU usage detected on {deviceName}",
+    "WirelessController": "AP disconnection event on {deviceName}",
+    "IoTGateway": "IoT data processing delay at {gatewayName}"
+}
 
 
-def generate_event(category="GSS"):
-    device_name, device_type = random.choice(DEVICES)
+def generate_event(category="ESG"):
+    # 隨機選擇網關與設備
     gateway_id, gateway_name = random.choice(GATEWAYS)
+    device_name, device_type = random.choice(DEVICES)
     severity = random.choice(SEVERITIES)
-    location = random.choice(LOCATIONS)
 
-    # 產生隨機數值
-    if device_type == "Temperature":
-        value = round(random.uniform(20, 90), 1)  # 攝氏度
-        unit = "°C"
-        message = f"Temperature reading {value}{unit} at {location}"
-    elif device_type == "CO2":
-        value = random.randint(300, 2000)  # ppm
-        unit = "ppm"
-        message = f"CO2 level {value}{unit} detected at {location}"
-    elif device_type == "Smoke":
-        value = random.randint(0, 10)  # 煙霧強度等級
-        unit = "scale"
-        message = f"Smoke intensity {value} detected at {location}"
-    elif device_type == "WaterLevel":
-        value = round(random.uniform(0.1, 5.0), 2)  # 公尺
-        unit = "m"
-        message = f"Water level {value}{unit} detected at {location}"
-    else:
-        value = None
-        unit = ""
-        message = f"{device_type} event detected at {location}"
+    # 模擬事件訊息
+    message = EVENT_TEMPLATES.get(device_type, "Generic device event").format(
+        deviceName=device_name, gatewayName=gateway_name
+    )
 
     event = {
         "category": category,
         "type": device_type,
         "metadata": {
             "deviceName": device_name,
-            "deviceAddress": f"192.168.0.{random.randint(2, 254)}",
+            "deviceAddress": f"10.0.{random.randint(1, 14)}.{random.randint(2, 254)}",
             "gatewayId": gateway_id,
             "gatewayName": gateway_name,
-            "subject": "AutoTest",
-            "location": location,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-            "value": value,
-            "unit": unit
+            "subject": f"{device_type} Status Report",
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z"
         },
         "severity": severity,
         "subject": f"{device_type} Alert",

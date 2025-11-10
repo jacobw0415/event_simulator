@@ -6,6 +6,8 @@ import sys
 import os
 import logging
 import threading
+import datetime
+import pytz
 from logging.handlers import RotatingFileHandler
 from requests.adapters import HTTPAdapter, Retry
 
@@ -34,7 +36,14 @@ if not logger.handlers:
     file_handler = RotatingFileHandler(
         log_file, maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
     )
+
     formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+
+    # ✅ 台北時區設定（Asia/Taipei）
+    def taipei_time(*args):
+        return datetime.datetime.now(pytz.timezone("Asia/Taipei")).timetuple()
+    formatter.converter = taipei_time
+
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
@@ -118,30 +127,38 @@ if __name__ == "__main__":
 
     logger.info(f"🚀 Event simulator started, sending to {API_URL} every {INTERVAL}s (SSL_VERIFY={SSL_VERIFY})")
 
+    MAX_TOKEN_RETRIES = 5
+    token_retries = 0
+
     while not stop_event.is_set():
-        event = generate_event(CATEGORY)
+        event = generate_event(category="ESG")
+
         try:
             res = send_event(event, token)
+
             if res is None:
                 logger.error("❌ No response from server.")
             elif res.status_code == 401:
-                logger.warning("⚠️ Token expired or invalid, refreshing...")
-                token = get_token()
-                if not token:
-                    logger.error("❌ Failed to refresh token, exiting.")
-                    break
+                if token_retries < MAX_TOKEN_RETRIES:
+                    token_retries += 1
+                    logger.warning("⚠️ Token expired, refreshing...")
+                    token = get_token()
+                    continue
                 else:
-                    res = send_event(event, token)
-
-            if res is not None:
-                logger.info(f"[OK] {event['metadata']['deviceName']} | {event['severity']} | Status {res.status_code}")
+                    logger.error("❌ Exceeded max token retries, exiting.")
+                    break
+            else:
+                token_retries = 0
+                logger.info(
+                    f"[OK] {event['metadata']['deviceName']} @ {event['metadata']['gatewayName']} | "
+                    f"{event['severity']} | Status {res.status_code}"
+                )
                 if res.status_code >= 400:
                     logger.error(f"Response: {res.text}")
 
         except Exception:
             logger.exception("❌ Failed to send event")
 
-        # 可中斷的 sleep
         stop_event.wait(INTERVAL)
 
     logger.info("✅ Event simulator stopped cleanly.")
